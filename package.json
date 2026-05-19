@@ -1,12 +1,12 @@
 {
   "name": "react-native-color-picker-input",
   "version": "0.1.0",
-  "description": "Color picker",
+  "description": "A customizable React Native color picker input with slider, wheel-slider, and wheel-square modes.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
   "exports": {
     ".": {
-      "source": "./src/index.tsx",
+      "source": "./src/index.ts",
       "types": "./lib/typescript/src/index.d.ts",
       "default": "./lib/module/index.js"
     },
@@ -83,14 +83,21 @@
     "react": "19.2.3",
     "react-native": "0.85.0",
     "react-native-builder-bob": "^0.41.0",
+    "react-native-svg": "^15.11.2",
     "react-native-web": "~0.21.1",
     "release-it": "^19.2.4",
     "turbo": "^2.8.21",
     "typescript": "^6.0.2"
   },
   "peerDependencies": {
-    "react": "*",
-    "react-native": "*"
+    "react": ">=18",
+    "react-native": ">=0.72",
+    "react-native-svg": ">=15"
+  },
+  "peerDependenciesMeta": {
+    "react-native-svg": {
+      "optional": false
+    }
   },
   "workspaces": [
     "example"
@@ -123,9 +130,13 @@
   },
   "jest": {
     "preset": "@react-native/jest-preset",
+    "testEnvironment": "node",
     "modulePathIgnorePatterns": [
       "<rootDir>/example/node_modules",
       "<rootDir>/lib/"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!(react-native|@react-native|react-native-svg)/)"
     ]
   },
   "commitlint": {

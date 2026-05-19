@@ -10,7 +10,17 @@ const root = path.resolve(__dirname, '..');
  *
  * @type {import('metro-config').MetroConfig}
  */
-const config = withMetroConfig(getDefaultConfig(__dirname), {
+const baseConfig = getDefaultConfig(__dirname);
+
+// RN 0.85+ returns blockList as a RegExp; react-native-monorepo-config expects an array.
+if (
+  baseConfig.resolver?.blockList &&
+  !Array.isArray(baseConfig.resolver.blockList)
+) {
+  baseConfig.resolver.blockList = [baseConfig.resolver.blockList];
+}
+
+const config = withMetroConfig(baseConfig, {
   root,
   dirname: __dirname,
 });
