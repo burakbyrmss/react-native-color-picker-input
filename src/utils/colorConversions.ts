@@ -169,6 +169,31 @@ export function hsvToHex(hsv: HSVColor): string {
   return rgbToHex(hsvToRgb(hsv));
 }
 
+function rgbaMatches(a: RGBColor, b: RGBColor): boolean {
+  return a.r === b.r && a.g === b.g && a.b === b.b && (a.a ?? 1) === (b.a ?? 1);
+}
+
+/**
+ * When only S/V change, hex round-trips can shift hue (especially at low saturation).
+ * Keep the previous hue if the parsed color is the same RGB.
+ */
+export function mergeHsvFromParsedColor(
+  previous: HSVColor,
+  parsed: import('../types/color').ColorValue
+): HSVColor {
+  const next = parsed.hsv;
+
+  if (rgbaMatches(hsvToRgb(previous), parsed.rgba)) {
+    return { h: previous.h, s: next.s, v: next.v };
+  }
+
+  if (next.s === 0) {
+    return { h: previous.h, s: next.s, v: next.v };
+  }
+
+  return next;
+}
+
 export function colorValueFromHsv(
   hsv: HSVColor
 ): import('../types/color').ColorValue {

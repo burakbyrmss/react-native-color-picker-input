@@ -2,6 +2,7 @@ import {
   hexToRgb,
   hsvToHex,
   hsvToRgb,
+  mergeHsvFromParsedColor,
   rgbToHex,
   rgbToHsl,
   rgbToHsv,
@@ -29,6 +30,25 @@ describe('color conversions', () => {
 
   it('converts hsv to hex', () => {
     expect(hsvToHex({ h: 0, s: 100, v: 100 })).toBe('#ff0000');
+  });
+
+  it('preserves hue when parsed rgb matches previous color', () => {
+    const previous = { h: 200, s: 35, v: 70 };
+    const parsed = parseColor(hsvToHex(previous));
+    const wrongHue = { ...parsed, hsv: { ...parsed.hsv, h: 17 } };
+
+    expect(mergeHsvFromParsedColor(previous, wrongHue)).toEqual({
+      h: 200,
+      s: parsed.hsv.s,
+      v: parsed.hsv.v,
+    });
+  });
+
+  it('preserves hue for achromatic parsed colors', () => {
+    const previous = { h: 120, s: 80, v: 50 };
+    const parsed = parseColor('#808080');
+
+    expect(mergeHsvFromParsedColor(previous, parsed).h).toBe(120);
   });
 
   it('converts rgb to hsl', () => {
@@ -63,9 +83,9 @@ describe('parseColor', () => {
 });
 
 describe('formatColor', () => {
-  it('formats rgba and hsl', () => {
+  it('formats rgb and hsl', () => {
     const color = parseColor('#ff0000');
-    expect(formatColor(color, 'rgba')).toBe('rgba(255, 0, 0, 1)');
+    expect(formatColor(color, 'rgb')).toBe('rgb(255, 0, 0)');
     expect(formatColor(color, 'hsl')).toBe('hsl(0, 100%, 50%)');
   });
 });

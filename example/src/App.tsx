@@ -42,13 +42,13 @@ export default function App() {
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.label}>Modal presentation (RGBA)</Text>
+        <Text style={styles.label}>Modal presentation (RGB)</Text>
         <ColorPickerInput
           value={modalColor}
           onChange={(value) => setModalColor(value)}
           presentation="modal"
-          outputFormat="rgba"
-          displayFormat="rgba"
+          outputFormat="rgb"
+          displayFormat="rgb"
           mode="wheel-square"
         />
       </View>

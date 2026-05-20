@@ -6,15 +6,22 @@ import { ColorSwatch } from './ColorSwatch';
 export interface ColorPreviewProps {
   color: ColorValue;
   displayFormat: ColorFormat;
+  textColor?: string;
 }
 
-export function ColorPreview({ color, displayFormat }: ColorPreviewProps) {
+export function ColorPreview({
+  color,
+  displayFormat,
+  textColor,
+}: ColorPreviewProps) {
   const label = formatColor(color, displayFormat);
 
   return (
     <View style={styles.container}>
       <ColorSwatch color={color.hex} />
-      <Text style={styles.text}>{label}</Text>
+      <Text style={[styles.text, textColor != null && { color: textColor }]}>
+        {label}
+      </Text>
     </View>
   );
 }

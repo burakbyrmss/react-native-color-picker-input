@@ -9,7 +9,11 @@ import {
   type LayoutRectangle,
 } from 'react-native';
 import type { ColorPickerInputProps } from '../types/props';
-import { colorValueFromHsv } from '../utils/colorConversions';
+import {
+  colorValueFromHsv,
+  mergeHsvFromParsedColor,
+} from '../utils/colorConversions';
+import type { HSVColor } from '../types/color';
 import { formatColor } from '../utils/colorFormatters';
 import { parseColor } from '../utils/colorParsers';
 import { ColorPickerModal } from './ColorPickerModal';
@@ -42,6 +46,10 @@ export function ColorPickerInput(props: ColorPickerInputProps) {
     presets = DEFAULT_PROPS.presets,
     showPreview = DEFAULT_PROPS.showPreview,
     disabled = false,
+    inputBackgroundColor,
+    inputTextColor,
+    pickerBackgroundColor,
+    pickerTextColor,
     inputStyle,
     inputTextStyle,
     pickerContainerStyle,
@@ -69,10 +77,22 @@ export function ColorPickerInput(props: ColorPickerInputProps) {
   }, [value]);
 
   const [hsv, setHsv] = useState(parsedValue.hsv);
+  const lastEmittedRef = useRef<{ hsv: HSVColor; formatted: string } | null>(
+    null
+  );
 
   useEffect(() => {
-    setHsv(parsedValue.hsv);
-  }, [value, parsedValue.hsv]);
+    const pending = lastEmittedRef.current;
+
+    if (pending !== null && pending.formatted === value.trim()) {
+      lastEmittedRef.current = null;
+      setHsv(pending.hsv);
+      return;
+    }
+
+    lastEmittedRef.current = null;
+    setHsv((previous) => mergeHsvFromParsedColor(previous, parsedValue));
+  }, [value, parsedValue]);
 
   const displayText = useMemo(
     () => formatColor(parsedValue, displayFormat),
@@ -80,9 +100,10 @@ export function ColorPickerInput(props: ColorPickerInputProps) {
   );
 
   const emitChange = useCallback(
-    (nextHsv: typeof hsv) => {
+    (nextHsv: HSVColor) => {
       const colorObject = colorValueFromHsv(nextHsv);
       const formatted = formatColor(colorObject, outputFormat);
+      lastEmittedRef.current = { hsv: nextHsv, formatted };
       onChange(formatted, colorObject);
     },
     [onChange, outputFormat]
@@ -101,28 +122,30 @@ export function ColorPickerInput(props: ColorPickerInputProps) {
       return;
     }
 
-    const measure = inputRef.current?.measureInWindow;
-    if (measure) {
-      measure((x, y, width, height) => {
-        setAnchorLayout({ x, y, width, height });
-        setOpen(true);
-        onOpen?.();
+    const showPicker = (layout: LayoutRectangle | null) => {
+      setAnchorLayout(layout);
+      setOpen(true);
+      onOpen?.();
+    };
+
+    const node = inputRef.current;
+    if (node?.measureInWindow) {
+      // Must call on the ref — extracting measureInWindow loses `this` and the callback never runs.
+      node.measureInWindow((x, y, width, height) => {
+        showPicker({ x, y, width, height });
       });
       return;
     }
 
-    const node = findNodeHandle(inputRef.current);
-    if (node != null) {
-      UIManager.measureInWindow(node, (x, y, width, height) => {
-        setAnchorLayout({ x, y, width, height });
-        setOpen(true);
-        onOpen?.();
+    const handle = findNodeHandle(node);
+    if (handle != null) {
+      UIManager.measureInWindow(handle, (x, y, width, height) => {
+        showPicker({ x, y, width, height });
       });
       return;
     }
 
-    setOpen(true);
-    onOpen?.();
+    showPicker(null);
   }, [disabled, onOpen]);
 
   const closePicker = useCallback(() => {
@@ -139,6 +162,8 @@ export function ColorPickerInput(props: ColorPickerInputProps) {
     showPreview,
     displayFormat,
     pickerContainerStyle,
+    pickerBackgroundColor,
+    pickerTextColor,
   };
 
   return (
@@ -154,6 +179,9 @@ export function ColorPickerInput(props: ColorPickerInputProps) {
           disabled={disabled}
           style={({ pressed }) => [
             styles.input,
+            inputBackgroundColor != null && {
+              backgroundColor: inputBackgroundColor,
+            },
             pressed && !disabled && styles.inputPressed,
             disabled && styles.inputDisabled,
             inputStyle,
@@ -163,7 +191,13 @@ export function ColorPickerInput(props: ColorPickerInputProps) {
         >
           {showInputSwatch ? <ColorSwatch color={parsedValue.hex} /> : null}
           {showInputText ? (
-            <Text style={[styles.inputText, inputTextStyle]}>
+            <Text
+              style={[
+                styles.inputText,
+                inputTextColor != null && { color: inputTextColor },
+                inputTextStyle,
+              ]}
+            >
               {displayText}
             </Text>
           ) : null}

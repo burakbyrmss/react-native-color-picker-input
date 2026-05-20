@@ -1,7 +1,8 @@
+import { useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { BrightnessSlider } from '../controls/BrightnessSlider';
 import { HueWheel } from '../controls/HueWheel';
-import { SaturationSlider } from '../controls/SaturationSlider';
+import { HSVHorizontalStrip } from '../controls/HSVHorizontalStrip';
+import { HSVStripStack } from '../controls/HSVStripStack';
 import type { HSVColor } from '../types/color';
 
 export interface WheelSliderPickerProps {
@@ -10,11 +11,30 @@ export interface WheelSliderPickerProps {
 }
 
 export function WheelSliderPicker({ hsv, onChange }: WheelSliderPickerProps) {
+  const handlePatch = useCallback(
+    (patch: Partial<HSVColor>) => {
+      onChange({ ...hsv, ...patch });
+    },
+    [hsv, onChange]
+  );
+
   return (
     <View style={styles.container}>
       <HueWheel hue={hsv.h} onChange={(h) => onChange({ ...hsv, h })} />
-      <SaturationSlider hsv={hsv} onChange={(s) => onChange({ ...hsv, s })} />
-      <BrightnessSlider hsv={hsv} onChange={(v) => onChange({ ...hsv, v })} />
+      <HSVStripStack>
+        <HSVHorizontalStrip
+          accessibilityLabel="Saturation"
+          kind="s"
+          hsv={hsv}
+          onChange={handlePatch}
+        />
+        <HSVHorizontalStrip
+          accessibilityLabel="Brightness"
+          kind="v"
+          hsv={hsv}
+          onChange={handlePatch}
+        />
+      </HSVStripStack>
     </View>
   );
 }
@@ -22,5 +42,6 @@ export function WheelSliderPicker({ hsv, onChange }: WheelSliderPickerProps) {
 const styles = StyleSheet.create({
   container: {
     gap: 12,
+    alignItems: 'center',
   },
 });

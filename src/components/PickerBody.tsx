@@ -16,6 +16,8 @@ export interface PickerBodyProps {
   presets: string[];
   showPreview: boolean;
   displayFormat: ColorFormat;
+  pickerBackgroundColor?: string;
+  pickerTextColor?: string;
   pickerContainerStyle?: StyleProp<ViewStyle>;
 }
 
@@ -27,6 +29,8 @@ export function PickerBody({
   presets,
   showPreview,
   displayFormat,
+  pickerBackgroundColor,
+  pickerTextColor,
   pickerContainerStyle,
 }: PickerBodyProps) {
   const handlePresetSelect = (preset: string) => {
@@ -49,13 +53,25 @@ export function PickerBody({
   };
 
   return (
-    <View style={[styles.container, pickerContainerStyle]}>
+    <View
+      style={[
+        styles.container,
+        pickerBackgroundColor != null && {
+          backgroundColor: pickerBackgroundColor,
+        },
+        pickerContainerStyle,
+      ]}
+    >
       {showPresets ? (
         <PresetColors presets={presets} onSelect={handlePresetSelect} />
       ) : null}
       {renderMode()}
       {showPreview ? (
-        <ColorPreview color={colorValue} displayFormat={displayFormat} />
+        <ColorPreview
+          color={colorValue}
+          displayFormat={displayFormat}
+          textColor={pickerTextColor}
+        />
       ) : null}
     </View>
   );

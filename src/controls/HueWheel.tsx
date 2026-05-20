@@ -146,4 +146,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export { WHEEL_SIZE };
+export { WHEEL_SIZE, WHEEL_RADIUS, INNER_RADIUS };

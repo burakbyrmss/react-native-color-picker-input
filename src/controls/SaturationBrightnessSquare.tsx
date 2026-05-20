@@ -5,17 +5,19 @@ import type { HSVColor } from '../types/color';
 import { clamp } from '../utils/clamp';
 import { hsvToRgb } from '../utils/colorConversions';
 
-const SQUARE_SIZE = 200;
+const DEFAULT_SIZE = 200;
 const INDICATOR_SIZE = 18;
 
 export interface SaturationBrightnessSquareProps {
   hsv: HSVColor;
   onChange: (hsv: Pick<HSVColor, 's' | 'v'>) => void;
+  size?: number;
 }
 
 export function SaturationBrightnessSquare({
   hsv,
   onChange,
+  size = DEFAULT_SIZE,
 }: SaturationBrightnessSquareProps) {
   const uid = useId().replace(/:/g, '');
   const saturationId = `saturationOverlay-${uid}`;
@@ -26,11 +28,11 @@ export function SaturationBrightnessSquare({
 
   const updateFromTouch = useCallback(
     (locationX: number, locationY: number) => {
-      const s = clamp((locationX / SQUARE_SIZE) * 100, 0, 100);
-      const v = clamp(100 - (locationY / SQUARE_SIZE) * 100, 0, 100);
+      const s = clamp((locationX / size) * 100, 0, 100);
+      const v = clamp(100 - (locationY / size) * 100, 0, 100);
       onChange({ s: Math.round(s), v: Math.round(v) });
     },
-    [onChange]
+    [onChange, size]
   );
 
   const panResponder = useRef(
@@ -52,12 +54,16 @@ export function SaturationBrightnessSquare({
     })
   ).current;
 
-  const indicatorX = (hsv.s / 100) * SQUARE_SIZE;
-  const indicatorY = (1 - hsv.v / 100) * SQUARE_SIZE;
+  const indicatorX = (hsv.s / 100) * size;
+  const indicatorY = (1 - hsv.v / 100) * size;
+  const cornerRadius = Math.max(4, Math.round(size * 0.06));
 
   return (
-    <View style={styles.container} {...panResponder.panHandlers}>
-      <Svg width={SQUARE_SIZE} height={SQUARE_SIZE}>
+    <View
+      style={[styles.container, { width: size, height: size }]}
+      {...panResponder.panHandlers}
+    >
+      <Svg width={size} height={size}>
         <Defs>
           <LinearGradient id={saturationId} x1="0" y1="0" x2="1" y2="0">
             <Stop offset="0" stopColor="#ffffff" stopOpacity="1" />
@@ -68,23 +74,18 @@ export function SaturationBrightnessSquare({
             <Stop offset="1" stopColor="#000000" stopOpacity="1" />
           </LinearGradient>
         </Defs>
+        <Rect width={size} height={size} fill={baseColor} rx={cornerRadius} />
         <Rect
-          width={SQUARE_SIZE}
-          height={SQUARE_SIZE}
-          fill={baseColor}
-          rx={8}
-        />
-        <Rect
-          width={SQUARE_SIZE}
-          height={SQUARE_SIZE}
+          width={size}
+          height={size}
           fill={`url(#${saturationId})`}
-          rx={8}
+          rx={cornerRadius}
         />
         <Rect
-          width={SQUARE_SIZE}
-          height={SQUARE_SIZE}
+          width={size}
+          height={size}
           fill={`url(#${brightnessId})`}
-          rx={8}
+          rx={cornerRadius}
         />
       </Svg>
       <View
@@ -95,12 +96,12 @@ export function SaturationBrightnessSquare({
             left: clamp(
               indicatorX - INDICATOR_SIZE / 2,
               0,
-              SQUARE_SIZE - INDICATOR_SIZE
+              size - INDICATOR_SIZE
             ),
             top: clamp(
               indicatorY - INDICATOR_SIZE / 2,
               0,
-              SQUARE_SIZE - INDICATOR_SIZE
+              size - INDICATOR_SIZE
             ),
           },
         ]}
@@ -111,10 +112,7 @@ export function SaturationBrightnessSquare({
 
 const styles = StyleSheet.create({
   container: {
-    width: SQUARE_SIZE,
-    height: SQUARE_SIZE,
     alignSelf: 'center',
-    borderRadius: 8,
     overflow: 'hidden',
   },
   indicator: {
@@ -133,4 +131,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export { SQUARE_SIZE };
+export { DEFAULT_SIZE as SQUARE_SIZE };

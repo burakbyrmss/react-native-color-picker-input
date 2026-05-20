@@ -26,6 +26,15 @@ export interface ColorPickerInputProps {
 
   disabled?: boolean;
 
+  /** Input field background. Defaults to `#fff`. */
+  inputBackgroundColor?: string;
+  /** Input label text color. Defaults to `#222`. */
+  inputTextColor?: string;
+  /** Picker panel background. Defaults to `#fff`. */
+  pickerBackgroundColor?: string;
+  /** Picker preview text color. Defaults to `#333`. */
+  pickerTextColor?: string;
+
   inputStyle?: StyleProp<ViewStyle>;
   inputTextStyle?: StyleProp<TextStyle>;
   pickerContainerStyle?: StyleProp<ViewStyle>;

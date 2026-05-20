@@ -25,7 +25,7 @@ export interface ColorValue {
   hsv: HSVColor;
 }
 
-export type ColorFormat = 'hex' | 'rgba' | 'hsl';
+export type ColorFormat = 'hex' | 'rgb' | 'hsl';
 
 export type ColorPickerMode = 'slider' | 'wheel-slider' | 'wheel-square';
 
