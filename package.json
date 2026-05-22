@@ -1,6 +1,6 @@
 {
   "name": "react-native-color-picker-input",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "A customizable React Native color picker input with slider, wheel-slider, and wheel-square modes.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -38,7 +38,12 @@
     "typecheck": "tsc",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
     "test": "jest",
-    "release": "release-it --only-version",
+    "release": "bash scripts/release.sh",
+    "release:patch": "bash scripts/release.sh patch",
+    "release:minor": "bash scripts/release.sh minor",
+    "release:major": "bash scripts/release.sh major",
+    "release:dry": "bash scripts/release.sh --dry-run patch",
+    "version:bump": "release-it --only-version",
     "web": "vite",
     "build:web": "vite build"
   },
@@ -142,7 +147,11 @@
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
-    ]
+    ],
+    "rules": {
+      "body-max-line-length": [0],
+      "header-max-length": [0]
+    }
   },
   "release-it": {
     "git": {
